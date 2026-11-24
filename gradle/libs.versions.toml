@@ -1,0 +1,19 @@
+# Every version lives here. Nothing is declared inline in a build script.
+# These are verified against the repositories that serve them and then frozen for the
+# project; changing one is its own commit with a full build and test run.
+
+[versions]
+kotlin = "2.4.21"
+agp = "8.13.2"
+coreKtx = "1.19.1"
+junit = "4.13.2"
+
+[libraries]
+androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
+junit = { group = "junit", name = "junit", version.ref = "junit" }
+
+[plugins]
+kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
+kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+android-library = { id = "com.android.library", version.ref = "agp" }
+android-application = { id = "com.android.application", version.ref = "agp" }

@@ -1,0 +1,32 @@
+name: Build
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Core purity and tests
+        run: ./gradlew :engine-core:check --no-daemon --stacktrace
+
+      - name: Assemble the adapter and the demo
+        run: ./gradlew :engine-android:assembleDebug :app-demo:assembleDebug --no-daemon --stacktrace
+
+      - name: Name the APK
+        run: cp app-demo/build/outputs/apk/debug/app-demo-debug.apk "$GITHUB_WORKSPACE/reader-engine-demo.apk"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: reader-engine-demo
+          path: app-demo/build/outputs/apk/debug/*.apk

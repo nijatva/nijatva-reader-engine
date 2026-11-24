@@ -76,6 +76,7 @@ object CharacterReferences {
 
     /** Names that also decode without the trailing semicolon, as the specification allows. */
     private val LEGACY = setOf("amp", "lt", "gt", "quot", "nbsp", "copy", "reg")
+    private val LEGACY_SORTED = LEGACY.sortedByDescending { it.length }
 
     private val MAX_NAME = NAMED.keys.maxOf { it.length }
 
@@ -126,13 +127,13 @@ object CharacterReferences {
             return Result(NAMED.getValue(best), bestLength + 1)
         }
 
-        // no semicolon form: only the legacy names, and only when it is unambiguous
-        val legacyEnd = minOf(text.length, start + 1 + 4)
-        var name = ""
-        var j = start + 1
-        while (j < legacyEnd && text[j].isLetter()) { name += text[j]; j++ }
-        if (name in LEGACY) {
-            val next = if (j < text.length) text[j] else ' '
+        // No semicolon form. Try the legacy names longest first: scanning letters greedily
+        // turns "&ampb" into the name "ampb", which matches nothing and loses the "&".
+        for (name in LEGACY_SORTED) {
+            if (!text.regionMatches(start + 1, name, 0, name.length)) continue
+            val after = start + 1 + name.length
+            val next = if (after < text.length) text[after] else ' '
+            // in an attribute, a legacy name followed by an alphanumeric or '=' is literal
             if (inAttribute && (next.isLetterOrDigit() || next == '=')) return null
             return Result(NAMED.getValue("$name;"), name.length + 1)
         }

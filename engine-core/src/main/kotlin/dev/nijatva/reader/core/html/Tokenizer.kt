@@ -117,6 +117,7 @@ class Tokenizer(
                     if (close != null && c == '<' && closesHere(close)) {
                         if (text.isNotEmpty()) return HtmlToken.Characters(text.toString(), textStart)
                         state = State.TAG_OPEN
+                        pos++
                     } else if (state == State.RCDATA && c == '&') {
                         val ref = CharacterReferences.decode(input, pos, inAttribute = false)
                         if (ref != null) { text.append(ref.text); pos += ref.consumed }
@@ -245,9 +246,9 @@ class Tokenizer(
 
                 State.AFTER_ATTRIBUTE_VALUE_QUOTED -> {
                     when {
-                        c.isWhitespace() -> { state = State.BEFORE_ATTRIBUTE_NAME; pos++ }
-                        c == '/' -> { state = State.SELF_CLOSING_START_TAG; pos++ }
-                        c == '>' -> { pos++; state = State.DATA
+                        c.isWhitespace() -> { commitAttribute(); state = State.BEFORE_ATTRIBUTE_NAME; pos++ }
+                        c == '/' -> { commitAttribute(); state = State.SELF_CLOSING_START_TAG; pos++ }
+                        c == '>' -> { commitAttribute(); pos++; state = State.DATA
                             val tok = if (isEndTag) HtmlToken.EndTag(tagName.toString().lowercase(), tagStart)
                                       else HtmlToken.StartTag(tagName.toString().lowercase(), attributes.toList(), selfClosing, tagStart)
                             resetTag(); return tok }

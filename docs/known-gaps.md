@@ -3,11 +3,20 @@
 Every unsupported construct the engine meets is counted in `CoverageReport` and listed
 here. Nothing is dropped silently.
 
-## M0
+## M1 — HTML tokenizer
 
-Nothing is implemented yet, so the honest list is: everything. The engine has no
-tokenizer, no tree builder, no cascade and no layout. `app-demo` shows a placeholder
-screen and says so.
+The tokenizer covers the states the supported subset needs: data, tag and attribute
+states, comments, doctype, CDATA, RCDATA, RAWTEXT and script data. Known gaps:
+
+- **Character reference table is a subset.** About 120 of the specification's 2,231 names
+  decode; the rest stay as literal text. The generator exists and is pinned, but the
+  specification host was unreachable when the table was written. See ADR 0002.
+- **No tree builder yet.** `nextToken()` returns tokens; nothing assembles a document, so
+  there are no implied end tags or insertion modes at this point. That is M2.
+- **Foreign content** (SVG, MathML) is not tokenised specially. `<![CDATA[` is treated as
+  text, which is only correct outside foreign content.
+- **Script data** is text up to `</script`; the double-escaped states are not implemented,
+  because the supported subset never executes a script.
 
 ## Standing gaps (by design, not by accident)
 

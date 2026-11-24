@@ -97,6 +97,7 @@ class Tokenizer(
                     when {
                         c == '<' -> {
                             if (text.isNotEmpty()) return HtmlToken.Characters(text.toString(), textStart)
+                            tagStart = pos
                             state = State.TAG_OPEN
                             pos++
                         }
@@ -116,6 +117,7 @@ class Tokenizer(
                     val close = if (state == State.PLAINTEXT) null else "</" + lastStartTag
                     if (close != null && c == '<' && closesHere(close)) {
                         if (text.isNotEmpty()) return HtmlToken.Characters(text.toString(), textStart)
+                        tagStart = pos
                         state = State.TAG_OPEN
                         pos++
                     } else if (state == State.RCDATA && c == '&') {
@@ -129,14 +131,14 @@ class Tokenizer(
                     when {
                         c == '!' -> { state = State.MARKUP_DECLARATION_OPEN; pos++ }
                         c == '/' -> { state = State.END_TAG_OPEN; pos++ }
-                        c.isLetter() -> { tagStart = pos; tagName = StringBuilder(); isEndTag = false; state = State.TAG_NAME }
+                        c.isLetter() -> { tagName = StringBuilder(); isEndTag = false; state = State.TAG_NAME }
                         else -> { error("invalid-first-character-of-tag-name"); text.append('<'); state = State.DATA }
                     }
                 }
 
                 State.END_TAG_OPEN -> {
                     if (c.isLetter()) {
-                        tagStart = pos; tagName = StringBuilder(); isEndTag = true; state = State.TAG_NAME
+                        tagName = StringBuilder(); isEndTag = true; state = State.TAG_NAME
                     } else if (c == '>') {
                         error("missing-end-tag-name"); state = State.DATA; pos++
                     } else {

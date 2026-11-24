@@ -18,10 +18,10 @@ jobs:
           java-version: '17'
 
       - name: Core purity and tests
-        run: ./gradlew :engine-core:check --no-daemon --stacktrace
+        run: sh gradlew :engine-core:check --no-daemon --stacktrace
 
       - name: Assemble the adapter and the demo
-        run: ./gradlew :engine-android:assembleDebug :app-demo:assembleDebug --no-daemon --stacktrace
+        run: sh gradlew :engine-android:assembleDebug :app-demo:assembleDebug --no-daemon --stacktrace
 
       - name: Name the APK
         run: cp app-demo/build/outputs/apk/debug/app-demo-debug.apk "$GITHUB_WORKSPACE/reader-engine-demo.apk"
